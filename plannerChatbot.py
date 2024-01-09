@@ -3,8 +3,8 @@ import openai
 
 st.sidebar.title("여행계획 챗봇")
 
-api_key = "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"
-openai.api_key = api_key
+openai.api_key= st.secrets["OPENAI_API_KEY"]
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
