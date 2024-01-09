@@ -23,7 +23,7 @@ if prompt:
     st.session_state["messages"].append({"role": "user", "content": prompt})
     # OpenAI API 호출
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-3.5-turbo-instuct",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=2000
     )
