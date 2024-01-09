@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+import OpenAI
 
 st.sidebar.title("여행계획 챗봇")
 
