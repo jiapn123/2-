@@ -1,37 +1,35 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 
-
-st.sidebar.title("여행계획 챗봇")
-
-api_key= st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
-
+api_key = st.secrets["openai_secret"]
+# OpenAI API 키 설정
+client = openai.OpenAI(api_key=api_key)
+# 페이지 설정
+st.set_page_config(page_title="챗봇 서비스 페이지", layout="wide")
+# 페이지 제목
+st.title("챗봇 서비스")
+# 챗봇 대화 기록 초기화
 if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.sidebar.empty():
-        st.markdown(f"**{message['role'].capitalize()}:** {message['content']}")
-
-prompt = st.sidebar.text_input("여행기간, 인원수 및 가고 싶은 곳을 알려주시면 여행 계획 짜드리겠습니다!")
-
-if st.sidebar.button("Send"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.sidebar.empty():
-        st.markdown(f"**User:** {prompt}")
-
-    prompt_lines = [f"{m['role'].capitalize()}: {m['content']}" for m in st.session_state.messages]
-    prompt = "Conversation:\n" + '\n'.join(prompt_lines)
-
-    response = openai.completion.create(
-        model="gpt-3.5-turbo-instruct",
-        prompt={"role": "user", "content": prompt},
-        max_tokens=1000
+    st.session_state["messages"] = []
+# 대화 표시
+for message in st.session_state["messages"]:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+# 대화 입력
+prompt = st.chat_input("메시지 입력")
+if prompt:
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    st.session_state["messages"].append({"role": "user", "content": prompt})
+    # OpenAI API 호출
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2000
     )
-
-    full_response = response.choices[0].text.strip()
-    with st.sidebar.empty():
-        st.markdown(f"**:robot_face:** {full_response}")
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
-    
+    # 응답 처리
+    if response.choices:
+        extracted_text = response.choices[0].message.content
+        with st.chat_message("assistant"):
+            st.markdown(extracted_text)
+        st.session_state["messages"].append({"role": "assistant", "content": extracted_text})
